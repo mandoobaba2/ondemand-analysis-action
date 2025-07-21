@@ -27,7 +27,7 @@ ONDEMAND_API_KEY=$3
 echo "Sending analysis request..."
 RESPONSE=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
   -H "Content-Type: application/json" \
-  -H "Authorization: bearer $ONDEMAND_API_KEY" \
+  -H "Authorization: Bearer $ONDEMAND_API_KEY" \
   -d "{\"resultVersion\": 2,\"memo\": \"github ondemand-analysis-action analysis\",\"sastOptions\": {\"analysisSource\": {\"type\": \"VCS\",\"vcsInfo\": {\"type\": \"git\",\"url\": \"$REPO_URL\",\"branch\": \"$REPO_BRANCH\"}}}}")
 
 echo "Response: $RESPONSE"
