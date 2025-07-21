@@ -22,7 +22,7 @@ fi
 
 REPO_URL=$1
 REPO_BRANCH=$2
-$ONDEMAND_API_KEY=$3
+ONDEMAND_API_KEY=$3
 
 echo "Sending analysis request..."
 RESPONSE=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
