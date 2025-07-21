@@ -1,0 +1,20 @@
+name: Test Analyze Action
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+
+      - name: Run analyze-action
+        uses: ./  # 이 레포 자체를 로컬 액션으로 호출
+        with:
+          repo_url: https://github.com/piuccio/cowsay
+          branch: master
+
+      - name: Print result
+        run: echo "${{ steps.run-analyze.outputs.result_json }}"

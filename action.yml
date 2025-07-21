@@ -1,0 +1,35 @@
+name: "Analyze Repository"
+description: "Analyze a cloned GitHub repository via external API and update the README with results"
+author: "Minwoo"
+
+inputs:
+  repo_url:
+    description: "GitHub repository URL to analyze"
+    required: true
+  branch:
+    description: "Branch name to checkout"
+    required: true
+  working_dir:
+    description: "Directory where the repository is located (optional)"
+    required: false
+    default: "target-repo"
+
+outputs:
+  result_json:
+    description: "Analysis result JSON string"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Clone target repository (if not already present)
+      shell: bash
+      run: |
+        if [ ! -d "${{ inputs.working_dir }}/.git" ]; then
+          echo "Cloning repository into ${{ inputs.working_dir }}..."
+          git clone --branch "${{ inputs.branch }}" --single-branch "${{ inputs.repo_url }}" "${{ inputs.working_dir }}"
+        else
+          echo "Repository already present at ${{ inputs.working_dir }}. Skipping clone."
+
+    - name: Run analysis script
+      shell: bash
+      run: bash "${{ github.action_path }}/entrypoint.sh" "${{ inputs.working_dir }}" "${{ github.output }}"
