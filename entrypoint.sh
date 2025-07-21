@@ -22,22 +22,22 @@ fi
 
 REPO_URL=$1
 REPO_BRANCH=$2
-ONDEMAND_API_KEY=$3
+API_KEY=$3
 
 echo "Sending analysis request..."
-RESPONSE=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
+REQUEST=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $ONDEMAND_API_KEY" \
+  -H "Authorization: Bearer $API_KEY" \
   -d "{\"resultVersion\": 2,\"memo\": \"github ondemand-analysis-action analysis\",\"sastOptions\": {\"analysisSource\": {\"type\": \"VCS\",\"vcsInfo\": {\"type\": \"git\",\"url\": \"$REPO_URL\",\"branch\": \"$REPO_BRANCH\"}}}}")
 
-echo "Response: $RESPONSE"
-ANALYSIS_ID=$(echo "$RESPONSE" | jq -r '.analysisList[0].analysisId')
+echo "Response: $REQUEST"
+ANALYSIS_ID=$(echo "$REQUEST" | jq -r '.analysisList[0].analysisId')
 
 echo "Polling analysis $ANALYSIS_ID status..."
 for i in {1..100}; do
   ANALYSIS=$(curl -s -X GET https://dev.ondemand.sparrowcloud.ai/api/v3/analysis/$ANALYSIS_ID \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $ONDEMAND_API_KEY")
+  -H "Authorization: Bearer $API_KEY")
   echo "ANALYSIS: $ANALYSIS"
   RESULT=$(echo "$ANALYSIS" | jq -r '.result')
 

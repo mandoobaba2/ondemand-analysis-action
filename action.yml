@@ -39,6 +39,14 @@ runs:
           echo "Cloning repository into ${{ inputs.working_dir }}..."
           git clone --branch "${{ inputs.branch }}" --single-branch "${{ inputs.repo_url }}" "${{ inputs.working_dir }}"
         fi
+    
+    - name: debug check (Inner Action)
+      shell: bash
+      run: |
+        echo "ls -al: " \
+        ls -al \
+        echo "pwd: " \
+        pwd \
 
     - name: Run analysis script
       shell: bash
