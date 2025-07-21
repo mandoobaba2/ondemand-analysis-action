@@ -38,6 +38,7 @@ for i in {1..100}; do
   ANALYSIS=$(curl -s -X GET https://dev.ondemand.sparrowcloud.ai/api/v3/analysis/$ANALYSIS_ID \
   -H "Content-Type: application/json" \
   -H "Authorization: bearer $ONDEMAND_API_KEY")
+  echo "ANALYSIS: $ANALYSIS"
   RESULT=$(echo "$ANALYSIS" | jq -r '.result')
 
   if [ "$RESULT" != null ]; then break; fi
