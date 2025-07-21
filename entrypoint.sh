@@ -50,22 +50,43 @@ if [ "$RESULT" = null ]; then
   exit 1
 fi
 
-echo "Downloading result..."
-RESULT=$(curl -s https://your.api/result/$ANALYSIS_ID)
-echo "$RESULT" > analysis-result.json
+# 결과 ZIP 다운로드 및 압축 해제
+echo "Downloading analysis result ZIP..."
+if ! curl -sfL -X GET "https://dev.ondemand.sparrowcloud.ai/api/v2/analysis/$ANALYSIS_ID/result" \
+  -H "Authorization: Bearer $API_KEY" \
+  -o result.zip; then
+  echo "[ERROR] Failed to download result zip"
+  exit 1
+fi
 
-echo "Writing output to GitHub Actions..."
-echo "result_json=$RESULT" >> "$GITHUB_OUTPUT"
+echo "Unzipping result.zip..."
+unzip -o result.zip -d ./result || {
+  echo "[ERROR] Failed to unzip result.zip"
+  exit 1
+}
+echo "Analysis result extracted to ./analysis-result"
 
-echo "Updating README.md..."
-TARGET=$(echo "$RESULT" | jq -r '.target')
-ROWS=$(echo "$RESULT" | jq -r '.rowCount')
-ANOMALY=$(echo "$RESULT" | jq -r '.anomalyCount')
-STATUS=$(echo "$RESULT" | jq -r '.status')
+while IFS= read -r line; do
+  echo "$line"
+done < ./result/summary.json
 
-TABLE_ROW="| $TARGET | $ROWS | $ANOMALY | ✅ $STATUS |"
 
-awk '/<!-- ANALYSIS-RESULTS:START -->/{print;print "\n| 대상 파일 | 총 행 수 | 이상 탐지 수 | 상태 |";print "|-------------|----------|------------------|--------|";next}
-     /<!-- ANALYSIS-RESULTS:END -->/ && !p {print ENVIRON["TABLE_ROW"]; p=1} 1' README.md > README.tmp
+# echo "Downloading result..."
+# RESULT=$(curl -s https://your.api/result/$ANALYSIS_ID)
+# echo "$RESULT" > analysis-result.json
 
-mv README.tmp README.md
+# echo "Writing output to GitHub Actions..."
+# echo "result_json=$RESULT" >> "$GITHUB_OUTPUT"
+
+# echo "Updating README.md..."
+# TARGET=$(echo "$RESULT" | jq -r '.target')
+# ROWS=$(echo "$RESULT" | jq -r '.rowCount')
+# ANOMALY=$(echo "$RESULT" | jq -r '.anomalyCount')
+# STATUS=$(echo "$RESULT" | jq -r '.status')
+
+# TABLE_ROW="| $TARGET | $ROWS | $ANOMALY | ✅ $STATUS |"
+
+# awk '/<!-- ANALYSIS-RESULTS:START -->/{print;print "\n| 대상 파일 | 총 행 수 | 이상 탐지 수 | 상태 |";print "|-------------|----------|------------------|--------|";next}
+#      /<!-- ANALYSIS-RESULTS:END -->/ && !p {print ENVIRON["TABLE_ROW"]; p=1} 1' README.md > README.tmp
+
+# mv README.tmp README.md
