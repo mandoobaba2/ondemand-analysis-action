@@ -27,10 +27,10 @@ runs:
     - name: Check Input values
       shell: bash
       run: |
-        echo repo_url: ${{ input.repo_url }} \
-        echo branch: ${{ input.branch }} \
-        echo ondemand_api_key: ${{ input.ondemand_api_key }} \
-        echo working_dir: ${{ input.working_dir }} 
+        echo repo_url: ${{ inputs.repo_url }} \
+        echo branch: ${{ inputs.branch }} \
+        echo ondemand_api_key: ${{ inputs.ondemand_api_key }} \
+        echo working_dir: ${{ inputs.working_dir }} 
 
     - name: Clone target repository (if not already present)
       shell: bash
