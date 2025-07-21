@@ -27,8 +27,7 @@ runs:
         if [ ! -d "${{ inputs.working_dir }}/.git" ]; then
           echo "Cloning repository into ${{ inputs.working_dir }}..."
           git clone --branch "${{ inputs.branch }}" --single-branch "${{ inputs.repo_url }}" "${{ inputs.working_dir }}"
-        else
-          echo "Repository already present at ${{ inputs.working_dir }}. Skipping clone."
+        fi
 
     - name: Run analysis script
       shell: bash
