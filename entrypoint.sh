@@ -1,32 +1,56 @@
 #!/bin/bash
 set -e
 
-WORKING_DIR=$1
-OUTPUT_FILE=$2
+# jq 존재 여부 확인
+if ! command -v jq &> /dev/null; then
+  echo "[INFO] jq not found. Installing jq..."
+  if [ -f /etc/debian_version ]; then
+    # Debian/Ubuntu 계열
+    sudo apt-get update
+    sudo apt-get install -y jq
+  elif [ -f /etc/redhat-release ]; then
+    # RHEL/CentOS 계열
+    sudo yum install -y epel-release
+    sudo yum install -y jq
+  else
+    echo "[ERROR] Unsupported OS. Please install jq manually."
+    exit 1
+  fi
+else
+  echo "[INFO] jq is already installed."
+fi
+
+REPO_URL=$1
+REPO_BRANCH=$2
+$ONDEMAND_API_KEY=$3
 
 echo "Sending analysis request..."
-RESPONSE=$(curl -s -X POST https://your.api/analyze \
+RESPONSE=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
   -H "Content-Type: application/json" \
-  -d "{\"target\": \"$WORKING_DIR/\"}")
+  -H "Authorization: bearer $ONDEMAND_API_KEY" \
+  -d "{\"resultVersion\": 2,\"memo\": \"github ondemand-analysis-action analysis\",\"sastOptions\": {\"analysisSource\": {\"type\": \"VCS\",\"vcsInfo\": {\"type\": \"git\",\"url\": \"$REPO_URL\",\"branch\": \"$REPO_BRANCH\"}}}}")
 
 echo "Response: $RESPONSE"
-JOB_ID=$(echo "$RESPONSE" | jq -r '.jobId')
+ANALYSIS_ID=$(echo "$RESPONSE" | jq -r '.analysisId')
 
 echo "Polling analysis status..."
-for i in {1..30}; do
-  STATUS=$(curl -s https://your.api/status/$JOB_ID | jq -r '.status')
-  echo "Status: $STATUS"
-  if [ "$STATUS" = "DONE" ]; then break; fi
+for i in {1..100}; do
+  ANALYSIS=$(curl -s -X GET curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v3/analysis/$ANALYSIS_ID \
+  -H "Content-Type: application/json" \
+  -H "Authorization: bearer $ONDEMAND_API_KEY")
+  RESULT=$(echo $ANALYSIS | jq -r '.result')
+
+  if [ "$RESULT" != null ]; then break; fi
   sleep 10
 done
 
-if [ "$STATUS" != "DONE" ]; then
+if [ "$RESULT" = null ]; then
   echo "Analysis timed out or failed"
   exit 1
 fi
 
 echo "Downloading result..."
-RESULT=$(curl -s https://your.api/result/$JOB_ID)
+RESULT=$(curl -s https://your.api/result/$ANALYSIS_ID)
 echo "$RESULT" > analysis-result.json
 
 echo "Writing output to GitHub Actions..."

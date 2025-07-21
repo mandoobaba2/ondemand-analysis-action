@@ -9,6 +9,9 @@ inputs:
   branch:
     description: "Branch name to checkout"
     required: true
+  ondemand_api_key:
+    description: "Sparrow On-Demand generated API key"
+    required: true
   working_dir:
     description: "Directory where the repository is located (optional)"
     required: false
@@ -31,4 +34,4 @@ runs:
 
     - name: Run analysis script
       shell: bash
-      run: bash "${{ github.action_path }}/entrypoint.sh" "${{ inputs.working_dir }}" "${{ github.output }}"
+      run: bash "${{ github.action_path }}/entrypoint.sh" "${{ inputs.repo_url }}" "${{ inputs.branch }}" "${{ inputs.ondemand_api_key }}"
