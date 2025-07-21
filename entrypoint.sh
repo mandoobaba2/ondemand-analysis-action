@@ -31,9 +31,9 @@ RESPONSE=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/
   -d "{\"resultVersion\": 2,\"memo\": \"github ondemand-analysis-action analysis\",\"sastOptions\": {\"analysisSource\": {\"type\": \"VCS\",\"vcsInfo\": {\"type\": \"git\",\"url\": \"$REPO_URL\",\"branch\": \"$REPO_BRANCH\"}}}}")
 
 echo "Response: $RESPONSE"
-ANALYSIS_ID=$(echo "$RESPONSE" | jq -r '.analysisId')
+ANALYSIS_ID=$(echo "$RESPONSE" | jq -r '.analysisList[0].analysisId')
 
-echo "Polling analysis status..."
+echo "Polling analysis $ANALYSIS_ID status..."
 for i in {1..100}; do
   ANALYSIS=$(curl -s -X GET https://dev.ondemand.sparrowcloud.ai/api/v3/analysis/$ANALYSIS_ID \
   -H "Content-Type: application/json" \
