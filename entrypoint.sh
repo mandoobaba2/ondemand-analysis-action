@@ -66,27 +66,23 @@ unzip -o result.zip -d ./result || {
 }
 echo "Analysis result extracted to ./analysis-result"
 
-while IFS= read -r line; do
-  echo "$line"
-done < ./result/summary.json
+# summary.json 출력
+echo "Printing summary.json..."
+if [ -f ./analysis-result/summary.json ]; then
+  cat ./result/summary.json
+else
+  echo "[WARNING] summary.json not found in extracted files"
+fi
 
+# RESULT.md 생성
+REPORT_MD=./result/RESULT.md
+echo "# \U0001F4CA Analysis Result Summary" > "$REPORT_MD"
+echo "" >> "$REPORT_MD"
+echo "| Total Issue | Very High | High | Medium | Low | Very Low |" >> "$REPORT_MD"
+echo "|------|------|----------|---------|---------|---------|" >> "$REPORT_MD"
+jq -r '"| \(.issueCount) | \(.issueCountRisk1) | \(.issueCountRisk2) | \(.issueCountRisk3) | \(.issueCountRisk4) | \(.issueCountRisk5) |"' ./result/summary.json >> "$REPORT_MD"
+echo "[INFO] RESULT.md written at $REPORT_MD"
 
-# echo "Downloading result..."
-# RESULT=$(curl -s https://your.api/result/$ANALYSIS_ID)
-# echo "$RESULT" > analysis-result.json
-
-# echo "Writing output to GitHub Actions..."
-# echo "result_json=$RESULT" >> "$GITHUB_OUTPUT"
-
-# echo "Updating README.md..."
-# TARGET=$(echo "$RESULT" | jq -r '.target')
-# ROWS=$(echo "$RESULT" | jq -r '.rowCount')
-# ANOMALY=$(echo "$RESULT" | jq -r '.anomalyCount')
-# STATUS=$(echo "$RESULT" | jq -r '.status')
-
-# TABLE_ROW="| $TARGET | $ROWS | $ANOMALY | ✅ $STATUS |"
-
-# awk '/<!-- ANALYSIS-RESULTS:START -->/{print;print "\n| 대상 파일 | 총 행 수 | 이상 탐지 수 | 상태 |";print "|-------------|----------|------------------|--------|";next}
-#      /<!-- ANALYSIS-RESULTS:END -->/ && !p {print ENVIRON["TABLE_ROW"]; p=1} 1' README.md > README.tmp
-
-# mv README.tmp README.md
+# GitHub Action output 설정
+echo "result_summary=$SUMMARY_JSON" >> "$GITHUB_OUTPUT"
+echo "report_path=$REPORT_MD" >> "$GITHUB_OUTPUT"
