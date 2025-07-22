@@ -18,7 +18,7 @@ inputs:
     default: "target-repo"
 
 outputs:
-  result_json:
+  result_summary:
     description: "Analysis result JSON string"
   report_path:
     description: "Analysis Markdown report file path"
