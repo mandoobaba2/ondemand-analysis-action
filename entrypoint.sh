@@ -75,7 +75,7 @@ HTTP_STATUS=$(curl -s -w "%{http_code}" -o "$RESPONSE_FILE" -X POST https://dev.
           }
         }
       }
-    } | if $token != "" then .sastOptions.analysisSource.vcsInfo.authToken = $token else . end
+    } | if $token != "" then .sastOptions.analysisSource.vcsInfo.auth.authToken = $token else . end
   ')")
 
 if [ "$HTTP_STATUS" -ne 200 ]; then
