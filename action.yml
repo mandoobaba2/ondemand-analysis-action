@@ -35,24 +35,6 @@ runs:
         echo ondemand_api_key: ${{ inputs.ondemand_api_key }} \
         echo working_dir: ${{ inputs.working_dir }} 
 
-    - name: Clone target repository (if not already present)
-      shell: bash
-      run: |
-        if [ ! -d "${{ inputs.working_dir }}/.git" ]; then
-          echo "Cloning repository into ${{ inputs.working_dir }}..."
-          git clone --branch "${{ inputs.branch }}" --single-branch "${{ inputs.repo_url }}" "${{ inputs.working_dir }}"
-        fi
-        
-    - name: debug ls -al (Inner Action)
-      shell: bash
-      run: |
-        ls -al
-        
-    - name: debug pwd (Inner Action)
-      shell: bash
-      run: |
-        pwd
-
     - name: Run analysis script
       id: run-analysis-script
       shell: bash
