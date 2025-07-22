@@ -67,9 +67,11 @@ unzip -o result.zip -d ./result || {
 echo "Analysis result extracted to ./analysis-result"
 
 # summary.json 출력
+SUMMARY_JSON=""
 echo "Printing summary.json..."
 if [ -f ./analysis-result/summary.json ]; then
   cat ./result/summary.json
+  SUMMARY_JSON=$(jq -c . ./analysis-result/summary.json)
 else
   echo "[WARNING] summary.json not found in extracted files"
 fi
