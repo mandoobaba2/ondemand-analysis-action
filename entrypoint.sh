@@ -20,16 +20,63 @@ else
   echo "[INFO] jq is already installed."
 fi
 
-REPO_URL=$1
-REPO_BRANCH=$2
-API_KEY=$3
+# 기본값 설정
+REPO_BRANCH="main"
+VCS_AUTH_TOKEN=""
+
+# 명시적 인자 파싱
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --api-key)
+      API_KEY="$2"
+      shift 2
+      ;;
+    --repo-url)
+      REPO_URL="$2"
+      shift 2
+      ;;
+    --repo-branch)
+      REPO_BRANCH="$2"
+      shift 2
+      ;;
+    --vcs-auth-token)
+      VCS_AUTH_TOKEN="$2"
+      shift 2
+      ;;
+    *)
+      echo "[ERROR] Unknown argument: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# 필수 인자 확인
+if [[ -z "$API_KEY" || -z "$REPO_URL" ]]; then
+  echo "[ERROR] --api-key and --repo-url are required."
+  exit 1
+fi
 
 echo "Sending analysis request..."
 RESPONSE_FILE=$(mktemp)
 HTTP_STATUS=$(curl -s -w "%{http_code}" -o "$RESPONSE_FILE" -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $API_KEY" \
-  -d "{\"resultVersion\": 2,\"memo\": \"github ondemand-analysis-action analysis\",\"sastOptions\": {\"analysisSource\": {\"type\": \"VCS\",\"vcsInfo\": {\"type\": \"git\",\"url\": \"$REPO_URL\",\"branch\": \"$REPO_BRANCH\"}}}}")
+  -d "$(jq -nc --arg url "$REPO_URL" --arg branch "$REPO_BRANCH" --arg token "$VCS_AUTH_TOKEN" '
+    {
+      resultVersion: 2,
+      memo: "github ondemand-analysis-action analysis",
+      sastOptions: {
+        analysisSource: {
+          type: "VCS",
+          vcsInfo: {
+            type: "git",
+            url: $url,
+            branch: $branch
+          }
+        }
+      }
+    } | if $token != "" then .sastOptions.analysisSource.vcsInfo.authToken = $token else . end
+  ')")
 
 if [ "$HTTP_STATUS" -ne 200 ]; then
   echo "[ERROR] Failed to send analysis request. HTTP status: $HTTP_STATUS"
@@ -57,8 +104,6 @@ if [ "$RESULT" = null ]; then
   echo "Analysis timed out or failed"
   exit 1
 fi
-
-ANALYSIS_ID=10043
 
 # 결과 ZIP 다운로드 및 압축 해제
 echo "Downloading analysis result ZIP..."
@@ -88,7 +133,7 @@ fi
 
 # RESULT.md 생성
 REPORT_MD=./result/RESULT.md
-echo "# \U0001F4CA Analysis Result Summary" > "$REPORT_MD"
+echo "# 📊 Analysis Result Summary" > "$REPORT_MD"
 echo "" >> "$REPORT_MD"
 echo "| Total Issue | Very High | High | Medium | Low | Very Low |" >> "$REPORT_MD"
 echo "|------|------|----------|---------|---------|---------|" >> "$REPORT_MD"

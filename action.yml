@@ -3,19 +3,18 @@ description: "Analyze a cloned GitHub repository via external API and update the
 author: "Minwoo"
 
 inputs:
+  ondemand_api_key:
+    description: "Sparrow On-Demand generated API key"
+    required: true
   repo_url:
     description: "GitHub repository URL to analyze"
     required: true
   branch:
     description: "Branch name to checkout"
-    required: true
-  ondemand_api_key:
-    description: "Sparrow On-Demand generated API key"
-    required: true
-  working_dir:
-    description: "Directory where the repository is located (optional)"
     required: false
-    default: "target-repo"
+  vcs_auth_token:
+    description: "Token for Access private repository"
+    required: false
 outputs:
   result_summary:
     value: ${{ steps.run-analysis-script.outputs.result_summary }}
@@ -30,12 +29,12 @@ runs:
     - name: Check Input values
       shell: bash
       run: |
+        echo ondemand_api_key: ${{ inputs.ondemand_api_key }} \
         echo repo_url: ${{ inputs.repo_url }} \
         echo branch: ${{ inputs.branch }} \
-        echo ondemand_api_key: ${{ inputs.ondemand_api_key }} \
-        echo working_dir: ${{ inputs.working_dir }} 
+        echo vcs_auth_token: ${{ inputs.vcs_auth_token }} \
 
     - name: Run analysis script
       id: run-analysis-script
       shell: bash
-      run: bash "${{ github.action_path }}/entrypoint.sh" "${{ inputs.repo_url }}" "${{ inputs.branch }}" "${{ inputs.ondemand_api_key }}"
+      run: bash "${{ github.action_path }}/entrypoint.sh" --api-key "${{ inputs.ondemand_api_key }}" --repo-url "${{ inputs.repo_url }}" --repo-branch "${{ inputs.branch }}" --vcs_auth_token "${{ inputs.vcs_auth_token }}"
