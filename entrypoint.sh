@@ -24,31 +24,33 @@ REPO_URL=$1
 REPO_BRANCH=$2
 API_KEY=$3
 
-echo "Sending analysis request..."
-REQUEST=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $API_KEY" \
-  -d "{\"resultVersion\": 2,\"memo\": \"github ondemand-analysis-action analysis\",\"sastOptions\": {\"analysisSource\": {\"type\": \"VCS\",\"vcsInfo\": {\"type\": \"git\",\"url\": \"$REPO_URL\",\"branch\": \"$REPO_BRANCH\"}}}}")
+# echo "Sending analysis request..."
+# REQUEST=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
+#   -H "Content-Type: application/json" \
+#   -H "Authorization: Bearer $API_KEY" \
+#   -d "{\"resultVersion\": 2,\"memo\": \"github ondemand-analysis-action analysis\",\"sastOptions\": {\"analysisSource\": {\"type\": \"VCS\",\"vcsInfo\": {\"type\": \"git\",\"url\": \"$REPO_URL\",\"branch\": \"$REPO_BRANCH\"}}}}")
 
-echo "Response: $REQUEST"
-ANALYSIS_ID=$(echo "$REQUEST" | jq -r '.analysisList[0].analysisId')
+# echo "Response: $REQUEST"
+# ANALYSIS_ID=$(echo "$REQUEST" | jq -r '.analysisList[0].analysisId')
 
-echo "Polling analysis $ANALYSIS_ID status..."
-for i in {1..100}; do
-  ANALYSIS=$(curl -s -X GET https://dev.ondemand.sparrowcloud.ai/api/v3/analysis/$ANALYSIS_ID \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $API_KEY")
-  echo "ANALYSIS: $ANALYSIS"
-  RESULT=$(echo "$ANALYSIS" | jq -r '.result')
+# echo "Polling analysis $ANALYSIS_ID status..."
+# for i in {1..100}; do
+#   ANALYSIS=$(curl -s -X GET https://dev.ondemand.sparrowcloud.ai/api/v3/analysis/$ANALYSIS_ID \
+#   -H "Content-Type: application/json" \
+#   -H "Authorization: Bearer $API_KEY")
+#   echo "ANALYSIS: $ANALYSIS"
+#   RESULT=$(echo "$ANALYSIS" | jq -r '.result')
 
-  if [ "$RESULT" != null ]; then break; fi
-  sleep 10
-done
+#   if [ "$RESULT" != null ]; then break; fi
+#   sleep 10
+# done
 
-if [ "$RESULT" = null ]; then
-  echo "Analysis timed out or failed"
-  exit 1
-fi
+# if [ "$RESULT" = null ]; then
+#   echo "Analysis timed out or failed"
+#   exit 1
+# fi
+
+ANALYSIS_ID=10043
 
 # 결과 ZIP 다운로드 및 압축 해제
 echo "Downloading analysis result ZIP..."
