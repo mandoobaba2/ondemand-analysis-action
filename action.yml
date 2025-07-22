@@ -37,4 +37,4 @@ runs:
     - name: Run analysis script
       id: run-analysis-script
       shell: bash
-      run: bash "${{ github.action_path }}/entrypoint.sh" --api-key "${{ inputs.ondemand_api_key }}" --repo-url "${{ inputs.repo_url }}" --repo-branch "${{ inputs.branch }}" --vcs_auth_token "${{ inputs.vcs_auth_token }}"
+      run: bash "${{ github.action_path }}/entrypoint.sh" --api-key "${{ inputs.ondemand_api_key }}" --repo-url "${{ inputs.repo_url }}" --repo-branch "${{ inputs.branch }}" --vcs-auth-token "${{ inputs.vcs_auth_token }}"
