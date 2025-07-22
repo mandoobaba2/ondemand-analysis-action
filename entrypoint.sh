@@ -87,6 +87,9 @@ echo "|------|------|----------|---------|---------|---------|" >> "$REPORT_MD"
 jq -r '"| \(.issueCount) | \(.issueCountRisk1) | \(.issueCountRisk2) | \(.issueCountRisk3) | \(.issueCountRisk4) | \(.issueCountRisk5) |"' ./result/summary.json >> "$REPORT_MD"
 echo "[INFO] RESULT.md written at $REPORT_MD"
 
+echo "SUMMARY_JSON=$SUMMARY_JSON"
+echo "REPORT_MD=$REPORT_MD"
+
 # GitHub Action output 설정
 echo "result_summary=$SUMMARY_JSON" >> "$GITHUB_OUTPUT"
 echo "report_path=$REPORT_MD" >> "$GITHUB_OUTPUT"
