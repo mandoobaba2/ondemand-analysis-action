@@ -89,7 +89,7 @@ echo "Response: $REQUEST"
 ANALYSIS_ID=$(echo "$REQUEST" | jq -r '.analysisList[0].analysisId')
 
 echo "Polling analysis $ANALYSIS_ID status..."
-for i in {1..100}; do
+for i in {1..360}; do
   ANALYSIS=$(curl -s -X GET https://dev.ondemand.sparrowcloud.ai/api/v3/analysis/$ANALYSIS_ID \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $API_KEY")
