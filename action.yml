@@ -16,11 +16,12 @@ inputs:
     description: "Directory where the repository is located (optional)"
     required: false
     default: "target-repo"
-
 outputs:
   result_summary:
+    value: ${{ steps.run-analysis-script.outputs.result_summary }}
     description: "Analysis result JSON string"
   report_path:
+    value: ${{ steps.run-analysis-script.outputs.report_path }}
     description: "Analysis Markdown report file path"
 
 runs:
@@ -53,5 +54,6 @@ runs:
         pwd
 
     - name: Run analysis script
+      id: run-analysis-script
       shell: bash
       run: bash "${{ github.action_path }}/entrypoint.sh" "${{ inputs.repo_url }}" "${{ inputs.branch }}" "${{ inputs.ondemand_api_key }}"
