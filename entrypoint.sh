@@ -25,11 +25,19 @@ REPO_BRANCH=$2
 API_KEY=$3
 
 echo "Sending analysis request..."
-REQUEST=$(curl -s -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
+RESPONSE_FILE=$(mktemp)
+HTTP_STATUS=$(curl -s -w "%{http_code}" -o "$RESPONSE_FILE" -X POST https://dev.ondemand.sparrowcloud.ai/api/v1/analysis/tool/sast \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $API_KEY" \
   -d "{\"resultVersion\": 2,\"memo\": \"github ondemand-analysis-action analysis\",\"sastOptions\": {\"analysisSource\": {\"type\": \"VCS\",\"vcsInfo\": {\"type\": \"git\",\"url\": \"$REPO_URL\",\"branch\": \"$REPO_BRANCH\"}}}}")
 
+if [ "$HTTP_STATUS" -ne 200 ]; then
+  echo "[ERROR] Failed to send analysis request. HTTP status: $HTTP_STATUS"
+  cat "$RESPONSE_FILE"
+  exit 1
+fi
+
+REQUEST=$(cat "$RESPONSE_FILE")
 echo "Response: $REQUEST"
 ANALYSIS_ID=$(echo "$REQUEST" | jq -r '.analysisList[0].analysisId')
 
